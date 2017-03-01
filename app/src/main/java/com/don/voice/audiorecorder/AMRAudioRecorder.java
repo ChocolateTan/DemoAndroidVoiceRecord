@@ -1,6 +1,12 @@
 package com.don.voice.audiorecorder;
 
+import com.don.voice.common.CommonUtils;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaRecorder;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,12 +15,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by DON on 17/01/18.
  */
 
 public class AMRAudioRecorder {
+  private static final String TAG = AMRAudioRecorder.class.getSimpleName();
+  private final Context mContext;
   private boolean singleFile = true;
 
   private MediaRecorder recorder;
@@ -27,6 +38,9 @@ public class AMRAudioRecorder {
 
   private boolean isRecording;
 
+  private List<Float> mListVoice = new ArrayList<>();
+  private String mFileName;
+
   public boolean isRecording() {
     return isRecording;
   }
@@ -35,8 +49,9 @@ public class AMRAudioRecorder {
     return finalAudioPath;
   }
 
-  public AMRAudioRecorder (String audioFileDirectory) {
+  public AMRAudioRecorder (Context ctx, String audioFileDirectory) {
     this.fileDirectory = audioFileDirectory;
+    this.mContext = ctx;
 
     if (!this.fileDirectory.endsWith("/")) {
       this.fileDirectory += "/";
@@ -57,6 +72,8 @@ public class AMRAudioRecorder {
 
     recorder.start();
     isRecording = true;
+
+    updateMicStatus();
 
     return true;
   }
@@ -104,6 +121,9 @@ public class AMRAudioRecorder {
 
   private boolean merge () {
 
+//    String fileName = new Date().getTime() + ".amr";
+    CommonUtils.setVoiceViewData(mContext, mFileName, mListVoice);
+
     // If never paused, just return the file
     if (singleFile) {
       this.finalAudioPath = this.files.get(0);
@@ -111,7 +131,7 @@ public class AMRAudioRecorder {
     }
 
     // Merge files
-    String mergedFilePath = this.fileDirectory + new Date().getTime() + ".amr";
+    String mergedFilePath = this.fileDirectory + mFileName;
     try {
       FileOutputStream fos = new FileOutputStream(mergedFilePath);
 
@@ -163,13 +183,35 @@ public class AMRAudioRecorder {
     if (!directory.exists() || !directory.isDirectory()) {
       throw new IllegalArgumentException("[AMRAudioRecorder] audioFileDirectory is a not valid directory!");
     }
-
-    String filePath = directory.getAbsolutePath() + "/" + new Date().getTime() + ".amr";
+    mFileName = new Date().getTime() + ".amr";
+    String filePath = directory.getAbsolutePath() + "/" + mFileName;
     this.files.add(filePath);
 
     recorder.setOutputFile(filePath);
     recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
     recorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
     recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+  }
+
+  private int BASE = 1;
+  private int SPACE = 100;// 间隔取样时间
+  public void updateMicStatus(){
+    Timer timer = new Timer();
+    TimerTask timerTask = new TimerTask() {
+      @Override
+      public void run() {
+        if (recorder != null && isRecording) {
+          double ratio = (double)recorder.getMaxAmplitude() /BASE;
+          double db = 0;// 分贝
+          if (ratio > 1)
+            db = 20 * Math.log10(ratio);
+          Log.d(TAG,"分贝值："+db);
+          mListVoice.add((float) db);
+        }else{
+          this.cancel();
+        }
+      }
+    };
+    timer.schedule(timerTask, 1000, 1000);
   }
 }

@@ -13,4 +13,8 @@
   tools:context="com.don.voice.MediaRecorderActivity">
   <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:id="@+id/tv_record_text"/>
+  <com.don.voice.BarChartView
+    android:id="@+id/bar_chart_view"
+    android:layout_width="match_parent"
+    android:layout_height="100dp" />
 </LinearLayout>
