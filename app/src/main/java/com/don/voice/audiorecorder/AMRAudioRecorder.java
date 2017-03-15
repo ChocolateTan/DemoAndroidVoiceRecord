@@ -49,6 +49,10 @@ public class AMRAudioRecorder {
     return finalAudioPath;
   }
 
+  public String getFileName(){
+    return mFileName;
+  }
+
   public AMRAudioRecorder (Context ctx, String audioFileDirectory) {
     this.fileDirectory = audioFileDirectory;
     this.mContext = ctx;
@@ -189,8 +193,8 @@ public class AMRAudioRecorder {
 
     recorder.setOutputFile(filePath);
     recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-    recorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
-    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+    recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
   }
 
   private int BASE = 1;

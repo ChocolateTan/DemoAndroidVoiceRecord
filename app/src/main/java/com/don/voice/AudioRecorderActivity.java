@@ -6,11 +6,17 @@ import com.don.voice.common.InjectView;
 import com.don.voice.common.InjectViewOnClick;
 import com.don.voice.common.Injector;
 import com.don.voice.common.InjectorAdapter;
+import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 
+import android.app.ProgressDialog;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,7 +31,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +49,10 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
   private AMRAudioRecorder mAMRAudioRecorder;
   private boolean isStart = false;
   String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/dontest20170119/";
+  String path2 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/dontestFFmpeg/";
   private MediaPlayer mMediaPlay;
+  private FFmpeg ffmpeg;
+  private ProgressDialog progressDialog;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +67,12 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
     if (!file.exists()) {
       file.mkdirs();
     }
-
+    File file2 = new File(path2);
+    if (!file2.exists()) {
+      file2.mkdirs();
+    }
+    progressDialog = new ProgressDialog(this);
+    loadFFMpegBinary();
     getRecordList();
   }
 
@@ -74,6 +87,12 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
           mAMRAudioRecorder.stop();
           Log.i(TAG, "path=" + mAMRAudioRecorder.getAudioFilePath());
           ((Button) v).setText("錄音");
+//          AudioRecordFunc.getInstance().stopRecordAndFile();
+          String cmd = "-y -i "+ mAMRAudioRecorder.getAudioFilePath() + " " + path2 + mAMRAudioRecorder.getFileName().replace(".amr", ".mp3");
+          Log.i(TAG, "cmd=" + cmd);
+          String[] command = cmd.split(" ");
+          execFFmpegBinary(command);
+
           getRecordList();
         } else {
           Toast.makeText(this, "start record", Toast.LENGTH_SHORT).show();
@@ -84,6 +103,9 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
           }
           mAMRAudioRecorder = new AMRAudioRecorder(getApplication(), path);
           mAMRAudioRecorder.start();
+
+//          AudioRecordFunc.getInstance().startRecordAndFile();
+
           ((Button) v).setText("停止");
         }
 //        mAMRAudioRecorder.
@@ -246,4 +268,63 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
     return duration;
   }
 
+
+  private void loadFFMpegBinary() {
+    try {
+      ffmpeg = FFmpeg.getInstance(this);
+      ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+        @Override
+        public void onFailure() {
+          Toast.makeText(AudioRecorderActivity.this, "fail to load", Toast.LENGTH_SHORT).show();
+//          showUnsupportedExceptionDialog();
+        }
+      });
+    } catch (FFmpegNotSupportedException e) {
+//      showUnsupportedExceptionDialog();
+      e.printStackTrace();
+    }
+  }
+
+  private void execFFmpegBinary(final String[] command) {
+    try {
+      ffmpeg.execute(command, new ExecuteBinaryResponseHandler() {
+        @Override
+        public void onFailure(String s) {
+//          addTextViewToLayout("FAILED with output : "+s);
+          Toast.makeText(AudioRecorderActivity.this, "fail execFFmpegBinary" + s, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onSuccess(String s) {
+//          addTextViewToLayout("SUCCESS with output : "+s);
+          Toast.makeText(AudioRecorderActivity.this, "s" + s, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onProgress(String s) {
+          Log.d(TAG, "Started command : ffmpeg "+command);
+//          addTextViewToLayout("progress : "+s);
+          progressDialog.setMessage("Processing\n"+s);
+        }
+
+        @Override
+        public void onStart() {
+//          outputLayout.removeAllViews();
+
+          Log.d(TAG, "Started command : ffmpeg " + command);
+          progressDialog.setMessage("Processing...");
+          progressDialog.show();
+        }
+
+        @Override
+        public void onFinish() {
+          Log.d(TAG, "Finished command : ffmpeg "+command);
+          progressDialog.dismiss();
+        }
+      });
+    } catch (FFmpegCommandAlreadyRunningException e) {
+      // do nothing for now
+      e.printStackTrace();
+    }
+  }
 }
