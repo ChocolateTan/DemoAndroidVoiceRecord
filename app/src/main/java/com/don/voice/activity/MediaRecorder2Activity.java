@@ -41,9 +41,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class AudioRecorderActivity extends AppCompatActivity implements View.OnClickListener {
+public class MediaRecorder2Activity extends AppCompatActivity implements View.OnClickListener {
 
-  private static final String TAG = AudioRecorderActivity.class.getSimpleName();
+  private static final String TAG = MediaRecorder2Activity.class.getSimpleName();
   @InjectView(R.id.recycler_view)
   private RecyclerView mRecyclerView;
   @InjectView(R.id.btn_record)
@@ -277,7 +277,7 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
       ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
         @Override
         public void onFailure() {
-          Toast.makeText(AudioRecorderActivity.this, "fail to load", Toast.LENGTH_SHORT).show();
+          Toast.makeText(MediaRecorder2Activity.this, "fail to load", Toast.LENGTH_SHORT).show();
 //          showUnsupportedExceptionDialog();
         }
       });
@@ -293,13 +293,13 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
         @Override
         public void onFailure(String s) {
 //          addTextViewToLayout("FAILED with output : "+s);
-          Toast.makeText(AudioRecorderActivity.this, "fail execFFmpegBinary" + s, Toast.LENGTH_SHORT).show();
+          Toast.makeText(MediaRecorder2Activity.this, "fail execFFmpegBinary" + s, Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onSuccess(String s) {
 //          addTextViewToLayout("SUCCESS with output : "+s);
-          Toast.makeText(AudioRecorderActivity.this, "s" + s, Toast.LENGTH_SHORT).show();
+          Toast.makeText(MediaRecorder2Activity.this, "s" + s, Toast.LENGTH_SHORT).show();
         }
 
         @Override

@@ -79,6 +79,9 @@ public class AudioRecordFunc {
     return AudioFileFunc.getFileSize(NewAudioName);
   }
 
+  public boolean isRecore(){
+    return isRecord;
+  }
 
   private void close() {
     if (audioRecord != null) {

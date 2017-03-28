@@ -20,6 +20,8 @@ public class AudioFileFunc {
   private final static String AUDIO_RAW_FILENAME = "donRawAudio.raw";
   private final static String AUDIO_WAV_FILENAME = "donFinalAudio.wav";
   public final static String AUDIO_AMR_FILENAME = "donFinalAudio.amr";
+  private static String mFilePath;
+  private static String mFileName;
 
   /**
    * 判断是否有外部存储设备sdcard
@@ -86,4 +88,10 @@ public class AudioFileFunc {
     return mFile.length();
   }
 
+  public static void setFilePath(String path){
+    mFilePath=path;
+  }
+  public static void setFileName(String fileName){
+    mFileName=fileName;
+  }
 }

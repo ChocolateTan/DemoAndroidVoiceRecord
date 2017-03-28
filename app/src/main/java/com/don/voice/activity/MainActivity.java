@@ -49,14 +49,17 @@ public class MainActivity extends AppCompatActivity {
     barChartView.setValueList(list);
   }
 
-  @InjectViewOnClick({R.id.btn_media_recorder, R.id.btn_audio_recorder})
+  @InjectViewOnClick({R.id.btn_media_recorder, R.id.btn_audio_recorder, R.id.btn_audio_recorder2})
   public void onClick(View view){
     switch (view.getId()){
       case R.id.btn_media_recorder:
         ActivityCompat.startActivity(this, new Intent(this, MediaRecorderActivity.class), null);
         break;
       case R.id.btn_audio_recorder:
-        ActivityCompat.startActivity(this, new Intent(this, AudioRecorderActivity.class), null);
+        ActivityCompat.startActivity(this, new Intent(this, MediaRecorder2Activity.class), null);
+        break;
+      case R.id.btn_audio_recorder2:
+        ActivityCompat.startActivity(this, new Intent(this, AudioActivity.class), null);
         break;
     }
   }
