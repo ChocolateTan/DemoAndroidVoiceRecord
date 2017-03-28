@@ -3,6 +3,7 @@ package com.don.voice.audiorecorder;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 
+import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +15,7 @@ import java.io.IOException;
  */
 
 public class AudioRecordFunc {
+
   // 缓冲区字节大小
   private int bufferSizeInBytes = 0;
 
@@ -29,44 +31,42 @@ public class AudioRecordFunc {
 
   private static AudioRecordFunc mInstance;
 
-  private AudioRecordFunc(){
+  private AudioRecordFunc() {
 
   }
 
-  public synchronized static AudioRecordFunc getInstance()
-  {
-    if(mInstance == null)
+  public synchronized static AudioRecordFunc getInstance() {
+    if (mInstance == null) {
       mInstance = new AudioRecordFunc();
+    }
     return mInstance;
   }
 
   public int startRecordAndFile() {
     //判断是否有外部存储设备sdcard
-    if(AudioFileFunc.isSdcardExit())
-    {
-      if(isRecord)
-      {
-        return ErrorCode.E_STATE_RECODING;
-      }
-      else
-      {
-        if(audioRecord == null)
-          creatAudioRecord();
-
-        audioRecord.startRecording();
-        // 让录制状态为true
-        isRecord = true;
-        // 开启音频文件写入线程
-        new Thread(new AudioRecordThread()).start();
-
-        return ErrorCode.SUCCESS;
+    //    if(AudioFileFunc.isSdcardExit())
+    //    {
+    if (isRecord) {
+      return ErrorCode.E_STATE_RECODING;
+    } else {
+      if (audioRecord == null) {
+        creatAudioRecord();
       }
 
+      audioRecord.startRecording();
+      // 让录制状态为true
+      isRecord = true;
+      // 开启音频文件写入线程
+      new Thread(new AudioRecordThread()).start();
+
+      return ErrorCode.SUCCESS;
     }
-    else
-    {
-      return ErrorCode.E_NOSDCARD;
-    }
+
+    //    }
+    //    else
+    //    {
+    //      return ErrorCode.E_NOSDCARD;
+    //    }
 
   }
 
@@ -75,11 +75,11 @@ public class AudioRecordFunc {
   }
 
 
-  public long getRecordFileSize(){
+  public long getRecordFileSize() {
     return AudioFileFunc.getFileSize(NewAudioName);
   }
 
-  public boolean isRecore(){
+  public boolean isRecore() {
     return isRecord;
   }
 
@@ -101,15 +101,20 @@ public class AudioRecordFunc {
 
     // 获得缓冲区字节大小
     bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioFileFunc.AUDIO_SAMPLE_RATE,
-      AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+        AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
 
     // 创建AudioRecord对象
     audioRecord = new AudioRecord(AudioFileFunc.AUDIO_INPUT, AudioFileFunc.AUDIO_SAMPLE_RATE,
-      AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
+        AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
   }
 
 
+  private static final String TAG = "AudioRecordThread";
+//  short[] buffer = new short[bufferSizeInBytes];
+  private java.lang.Object mLock = new Object();
+
   class AudioRecordThread implements Runnable {
+
     @Override
     public void run() {
       writeDateTOFile();//往文件中写入裸数据
@@ -125,8 +130,8 @@ public class AudioRecordFunc {
   private void writeDateTOFile() {
     // new一个byte数组用来存一些字节数据，大小为缓冲区大小
     byte[] audiodata = new byte[bufferSizeInBytes];
+    short[] dd = new short[bufferSizeInBytes];
     FileOutputStream fos = null;
-    int readsize = 0;
     try {
       File file = new File(AudioName);
       if (file.exists()) {
@@ -137,8 +142,31 @@ public class AudioRecordFunc {
       e.printStackTrace();
     }
     while (isRecord == true) {
-      readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
-      if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos!=null) {
+      //r是实际读取的数据长度，一般而言r会小于buffersize
+//      int r = audioRecord.read(buffer, 0, bufferSizeInBytes);
+      int readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
+      int r = audioRecord.read(dd, 0, bufferSizeInBytes);
+
+      long v = 0;
+      // 将 buffer 内容取出，进行平方和运算
+      for (int i = 0; i < dd.length; i++) {
+        v += dd[i] * dd[i];
+      }
+      // 平方和除以数据总长度，得到音量大小。
+      double mean = v / (double) r;
+      double volume = 10 * Math.log10(mean);
+      Log.d(TAG, "分贝值:" + volume + " r=" + r);
+      // 大概一秒十次
+//      synchronized (mLock) {
+//        try {
+//          mLock.wait(1000);
+//        } catch (InterruptedException e) {
+//          e.printStackTrace();
+//        }
+//      }
+
+
+      if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos != null) {
         try {
           fos.write(audiodata);
         } catch (IOException e) {
@@ -147,8 +175,9 @@ public class AudioRecordFunc {
       }
     }
     try {
-      if(fos != null)
+      if (fos != null) {
         fos.close();// 关闭写入流
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -170,7 +199,7 @@ public class AudioRecordFunc {
       totalAudioLen = in.getChannel().size();
       totalDataLen = totalAudioLen + 36;
       WriteWaveFileHeader(out, totalAudioLen, totalDataLen,
-        longSampleRate, channels, byteRate);
+          longSampleRate, channels, byteRate);
       while (in.read(data) != -1) {
         out.write(data);
       }
@@ -190,8 +219,8 @@ public class AudioRecordFunc {
    * 自己特有的头文件。
    */
   private void WriteWaveFileHeader(FileOutputStream out, long totalAudioLen,
-                                   long totalDataLen, long longSampleRate, int channels, long byteRate)
-    throws IOException {
+      long totalDataLen, long longSampleRate, int channels, long byteRate)
+      throws IOException {
     byte[] header = new byte[44];
     header[0] = 'R'; // RIFF/WAVE header
     header[1] = 'I';
@@ -239,4 +268,14 @@ public class AudioRecordFunc {
     header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
     out.write(header, 0, 44);
   }
+
+  private int BASE = 1;
+  private int SPACE = 100;// 间隔取样时间
+//  public void updateMicStatus(){
+//    double ratio = (double)audioRecord.get.getMaxAmplitude() /BASE;
+//    double db = 0;// 分贝
+//    if (ratio > 1)
+//      db = 20 * Math.log10(ratio);
+//    Log.d("don","分贝值："+db);
+//  }
 }
