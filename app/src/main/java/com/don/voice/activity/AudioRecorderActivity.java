@@ -1,6 +1,8 @@
-package com.don.voice;
+package com.don.voice.activity;
 
-import com.don.voice.audiorecorder.AMRAudioRecorder;
+import com.don.voice.BarChartView;
+import com.don.voice.R;
+import com.don.voice.mediarecorder.MediaAudioRecorder;
 import com.don.voice.common.CommonUtils;
 import com.don.voice.common.InjectView;
 import com.don.voice.common.InjectViewOnClick;
@@ -46,7 +48,7 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
   private RecyclerView mRecyclerView;
   @InjectView(R.id.btn_record)
   private Button mBtnRecord;
-  private AMRAudioRecorder mAMRAudioRecorder;
+  private MediaAudioRecorder mAMRAudioRecorder;
   private boolean isStart = false;
   String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/dontest20170119/";
   String path2 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/dontestFFmpeg/";
@@ -101,7 +103,7 @@ public class AudioRecorderActivity extends AppCompatActivity implements View.OnC
             mAMRAudioRecorder.stop();
             mAMRAudioRecorder = null;
           }
-          mAMRAudioRecorder = new AMRAudioRecorder(getApplication(), path);
+          mAMRAudioRecorder = new MediaAudioRecorder(getApplication(), path);
           mAMRAudioRecorder.start();
 
 //          AudioRecordFunc.getInstance().startRecordAndFile();

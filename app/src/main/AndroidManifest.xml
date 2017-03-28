@@ -12,11 +12,11 @@
     android:label="@string/app_name"
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
-    <activity android:name=".MediaRecorderActivity">
+    <activity android:name=".activity.MediaRecorderActivity">
     </activity>
-    <activity android:name=".AudioRecorderActivity">
+    <activity android:name=".activity.AudioRecorderActivity">
     </activity>
-    <activity android:name=".MainActivity">
+    <activity android:name=".activity.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 

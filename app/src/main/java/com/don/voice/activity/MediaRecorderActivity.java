@@ -1,6 +1,6 @@
-package com.don.voice;
+package com.don.voice.activity;
 
-import com.don.voice.mediarecorder.PermissionsChecker;
+import com.don.voice.common.PermissionsChecker;
 
 import android.Manifest;
 import android.content.Context;

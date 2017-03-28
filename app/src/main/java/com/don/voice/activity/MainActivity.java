@@ -1,17 +1,16 @@
-package com.don.voice;
+package com.don.voice.activity;
 
+import com.don.voice.BarChartView;
+import com.don.voice.R;
 import com.don.voice.common.InjectView;
 import com.don.voice.common.InjectViewOnClick;
 import com.don.voice.common.Injector;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;

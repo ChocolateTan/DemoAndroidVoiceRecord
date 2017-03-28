@@ -9,7 +9,7 @@
   android:paddingLeft="@dimen/activity_horizontal_margin"
   android:paddingRight="@dimen/activity_horizontal_margin"
   android:paddingTop="@dimen/activity_vertical_margin"
-  tools:context="com.don.voice.MediaRecorderActivity">
+  tools:context="com.don.voice.activity.MediaRecorderActivity">
 
   <Button
     android:id="@+id/btn_media_recorder"

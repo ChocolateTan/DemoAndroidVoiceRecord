@@ -1,4 +1,4 @@
-package com.don.voice.mediarecorder;
+package com.don.voice.common;
 
 import android.content.Context;
 import android.content.pm.PackageManager;

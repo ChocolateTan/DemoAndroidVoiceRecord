@@ -1,11 +1,9 @@
-package com.don.voice.audiorecorder;
+package com.don.voice.mediarecorder;
 
 import com.don.voice.common.CommonUtils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaRecorder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.File;
@@ -23,8 +21,8 @@ import java.util.TimerTask;
  * Created by DON on 17/01/18.
  */
 
-public class AMRAudioRecorder {
-  private static final String TAG = AMRAudioRecorder.class.getSimpleName();
+public class MediaAudioRecorder {
+  private static final String TAG = MediaAudioRecorder.class.getSimpleName();
   private final Context mContext;
   private boolean singleFile = true;
 
@@ -53,7 +51,7 @@ public class AMRAudioRecorder {
     return mFileName;
   }
 
-  public AMRAudioRecorder (Context ctx, String audioFileDirectory) {
+  public MediaAudioRecorder(Context ctx, String audioFileDirectory) {
     this.fileDirectory = audioFileDirectory;
     this.mContext = ctx;
 
@@ -84,7 +82,7 @@ public class AMRAudioRecorder {
 
   public boolean pause () {
     if (recorder == null || !isRecording) {
-      throw new IllegalStateException("[AMRAudioRecorder] recorder is not recording!");
+      throw new IllegalStateException("[MediaAudioRecorder] recorder is not recording!");
     }
 
     recorder.stop();
@@ -98,7 +96,7 @@ public class AMRAudioRecorder {
 
   public boolean resume () {
     if (isRecording) {
-      throw new IllegalStateException("[AMRAudioRecorder] recorder is recording!");
+      throw new IllegalStateException("[MediaAudioRecorder] recorder is recording!");
     }
 
     singleFile = false;
@@ -185,7 +183,7 @@ public class AMRAudioRecorder {
   private void prepareRecorder () {
     File directory = new File(this.fileDirectory);
     if (!directory.exists() || !directory.isDirectory()) {
-      throw new IllegalArgumentException("[AMRAudioRecorder] audioFileDirectory is a not valid directory!");
+      throw new IllegalArgumentException("[MediaAudioRecorder] audioFileDirectory is a not valid directory!");
     }
     mFileName = new Date().getTime() + ".amr";
     String filePath = directory.getAbsolutePath() + "/" + mFileName;
