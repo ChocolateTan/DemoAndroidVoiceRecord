@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Created by DON on 17/03/15.
@@ -147,10 +149,13 @@ public class AudioRecordFunc {
       int readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
       //      int r = audioRecord.read(dd, 0, bufferSizeInBytes);
 
+      short[] shorts = new short[audiodata.length/2];
+      ByteBuffer.wrap(audiodata).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
+
       long v = 0;
       // 将 buffer 内容取出，进行平方和运算
-      for (int i = 0; i < readsize; i++) {
-        v += audiodata[i] * audiodata[i];
+      for (int i = 0; i < shorts.length; i++) {
+        v += shorts[i] * shorts[i];
       }
       // 平方和除以数据总长度，得到音量大小。
       double mean = v / (double) readsize;
