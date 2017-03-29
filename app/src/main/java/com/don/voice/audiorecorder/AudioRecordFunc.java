@@ -110,7 +110,7 @@ public class AudioRecordFunc {
 
 
   private static final String TAG = "AudioRecordThread";
-//  short[] buffer = new short[bufferSizeInBytes];
+  //  short[] buffer = new short[bufferSizeInBytes];
   private java.lang.Object mLock = new Object();
 
   class AudioRecordThread implements Runnable {
@@ -130,7 +130,7 @@ public class AudioRecordFunc {
   private void writeDateTOFile() {
     // new一个byte数组用来存一些字节数据，大小为缓冲区大小
     byte[] audiodata = new byte[bufferSizeInBytes];
-    short[] dd = new short[bufferSizeInBytes];
+    //    short[] dd = new short[bufferSizeInBytes];
     FileOutputStream fos = null;
     try {
       File file = new File(AudioName);
@@ -143,28 +143,19 @@ public class AudioRecordFunc {
     }
     while (isRecord == true) {
       //r是实际读取的数据长度，一般而言r会小于buffersize
-//      int r = audioRecord.read(buffer, 0, bufferSizeInBytes);
+      //      int r = audioRecord.read(buffer, 0, bufferSizeInBytes);
       int readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
-      int r = audioRecord.read(dd, 0, bufferSizeInBytes);
+      //      int r = audioRecord.read(dd, 0, bufferSizeInBytes);
 
       long v = 0;
       // 将 buffer 内容取出，进行平方和运算
-      for (int i = 0; i < dd.length; i++) {
-        v += dd[i] * dd[i];
+      for (int i = 0; i < readsize; i++) {
+        v += audiodata[i] * audiodata[i];
       }
       // 平方和除以数据总长度，得到音量大小。
-      double mean = v / (double) r;
+      double mean = v / (double) readsize;
       double volume = 10 * Math.log10(mean);
-      Log.d(TAG, "分贝值:" + volume + " r=" + r);
-      // 大概一秒十次
-//      synchronized (mLock) {
-//        try {
-//          mLock.wait(1000);
-//        } catch (InterruptedException e) {
-//          e.printStackTrace();
-//        }
-//      }
-
+      Log.d(TAG, "分贝值:" + volume + " r=" + readsize);
 
       if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos != null) {
         try {
@@ -271,11 +262,11 @@ public class AudioRecordFunc {
 
   private int BASE = 1;
   private int SPACE = 100;// 间隔取样时间
-//  public void updateMicStatus(){
-//    double ratio = (double)audioRecord.get.getMaxAmplitude() /BASE;
-//    double db = 0;// 分贝
-//    if (ratio > 1)
-//      db = 20 * Math.log10(ratio);
-//    Log.d("don","分贝值："+db);
-//  }
+  //  public void updateMicStatus(){
+  //    double ratio = (double)audioRecord.get.getMaxAmplitude() /BASE;
+  //    double db = 0;// 分贝
+  //    if (ratio > 1)
+  //      db = 20 * Math.log10(ratio);
+  //    Log.d("don","分贝值："+db);
+  //  }
 }
